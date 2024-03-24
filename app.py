@@ -7,15 +7,15 @@ api_key = "601016df9ac3a0db2d6228757bd661f0"
 def obter_clima():
     cidade = cidade_entry.get()
     url = f"http://api.openweathermap.org/data/2.5/weather?q={cidade}&appid={api_key}&lang=pt_br" # link da API
-    requisicao = requests.get(url)
-    data = requisicao.json()
+    response = requests.get(url)
+    data = response.json()
 
     if data["cod"] == 200:
         temperatura = data["main"]["temp"] - 273.15
         descricao = data["weather"][0]["description"]
         vento = data['wind']['speed']
         resultado_label.config(text=f"Temperatura: {temperatura: .1f}°C\nCondição: {descricao}\nVento: {vento} Km/h", fg='white')
-        sugerir_esportes(descricao, vento, temperatura)
+        sugerir_esportes(descricao, vento, temperatura)  # Passando argumentos
     else:
         resultado_label.config(text="Cidade não encontrada", fg='white')
 
@@ -23,7 +23,7 @@ def sugerir_esportes(condicao, vento, temperatura):
     condicao = condicao.lower()
     esportes_sugeridos = []
 
-    # Sugestões com base na temperatura
+    # Lógica para sugestões com base na temperatura
     if temperatura < 10:
         esportes_sugeridos.append("Esqui, Esportes em áreas climatizadas")
     elif 10 <= temperatura <= 40 and "céu limpo" in condicao or "algumas nuvens" in condicao or "nuvens dispersas" in condicao or "nuvens quebradas" in condicao:
@@ -31,11 +31,11 @@ def sugerir_esportes(condicao, vento, temperatura):
     elif temperatura > 37:
         esportes_sugeridos.append("Natação, Esporte evitando exposição ao sol")
 
-    # Se a temperatura for muito baixa, anular as outras sugestões
+    # Se a temperatura for baixa, anule as sugestões com base na descrição ou vento
     if temperatura < 10:
         esportes_label.config(text="Sugestões de esportes para baixas temperaturas:\n" + "\n".join(esportes_sugeridos), fg='white')
     else:
-        # Sugestões com base na descrição e no vento
+        # Lógica para sugestões com base na descrição e no vento
         if "nublado" in condicao or "nuvens nubladas" in condicao or "trovoada com chuva fraca" in condicao or "trovoada com chuva" in condicao or "trovoada com chuva forte" in condicao or "chuva leve" in condicao or "chuva moderada" in condicao or "chuva muito forte" in condicao or "chuva forte" in condicao or "garoa leve" in condicao or "névoa" in condicao:
             esportes_sugeridos.append("Esporte em área coberta / fechada")
 
@@ -44,7 +44,7 @@ def sugerir_esportes(condicao, vento, temperatura):
 
         if vento >= 7:  
             esportes_sugeridos.append("Vento bom para Kitesurf (Na presença de mar)")
-        elif vento >= 10:
+        elif vento >= 15:
             esportes_sugeridos.append("Vento bom para Vela (Na presença de mar)")
 
         if esportes_sugeridos:
@@ -53,17 +53,18 @@ def sugerir_esportes(condicao, vento, temperatura):
             esportes_label.config(text="Sem sugestões de esportes neste clima", fg='white')
 
 
-# Configurações da janela
+# Configuração da janela
 janela = tk.Tk()
-janela.title("SPORTS WEATHER")
-janela.geometry('510x570')
-janela.configure(bg='#181818')
+janela.title("SPORTS WEATHER")  # Título da janela
+janela.geometry('510x570')  # Tamanho da janela
+janela.configure(bg='#181818')  # Cor de fundo
 
-
+# Estilo de fonte
 fonte = ('Arial Rounded MT Bold', 14, 'bold')
     
+# Título do aplicativo
 titulo_label = tk.Label(janela, text="SPORTS WEATHER", font=('Helvetica', 20, 'bold', 'italic'), bg='#181818', fg='#33FFC2')
-titulo_label.pack(pady=10)
+titulo_label.pack(pady=10)  # Espaço entre o título e os outros elementos
 
 # Inserir a cidade
 cidade_label = tk.Label(janela, text="Digite o nome da cidade:", font=fonte, bg='#181818', fg='white', padx=10, pady=10)
@@ -71,7 +72,7 @@ cidade_label.pack()
 cidade_entry = tk.Entry(janela, font=fonte)
 cidade_entry.pack(padx=10, pady=5)
 
-# Botão para obter o clima e os esportes
+# Botão para obter o clima
 obter_clima_button = tk.Button(janela, text="Obter Informações", command=obter_clima, font=fonte, bg='#33FFC2', padx=10, pady=6)
 obter_clima_button.pack(pady=7)
 
